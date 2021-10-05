@@ -45,7 +45,8 @@ create_chroot_tree() {
     else
         ./4make/ensure-free-mem.sh 8G
         sudo mount -t tmpfs -o size=6G mash-ramdisk "${CHROOT}"
-        sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tgz" -g /dev/null -C "${CHROOT}"
+        #sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tgz" -g /dev/null -C "${CHROOT}"
+        sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tgz" -C "${CHROOT}"
     fi
 }
 
@@ -98,10 +99,11 @@ create_final_tarball() {
     mkdir -p "$(dirname "${TAR_FILE}")"
     # _LEVEL_OPT="--level=$([ "$TARGET_NAME" = headless ] && printf '0' || printf '1' )"
     if [ "$TARGET_NAME" = headless ]; then rm -f "${TAR_METADATA_FILE}"; fi
-    sudo tar -czf "${TAR_FILE}" -g "${TAR_METADATA_FILE}" -C "${CHROOT}/" . #  "${_LEVEL_OPT}"
+    #sudo tar -czf "${TAR_FILE}" -g "${TAR_METADATA_FILE}" -C "${CHROOT}/" . #  "${_LEVEL_OPT}"
+    sudo tar -czf "${TAR_FILE}" -C "${CHROOT}/" .
     # tar --listed-incremental=snapshot.file -cvzf backup.1.tar.gz /path/to/dir
     sudo chown "${USER}:${USER}" "${TAR_FILE}"
-    sudo chown "${USER}:${USER}" "${TAR_METADATA_FILE}"
+    # sudo chown "${USER}:${USER}" "${TAR_METADATA_FILE}"
 }
 
 main() {

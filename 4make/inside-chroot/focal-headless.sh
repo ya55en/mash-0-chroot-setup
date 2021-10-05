@@ -26,7 +26,13 @@ do_distupgrade() {
 }
 
 install_apt_packages() {
-    apt-get install -y curl vim >> "$TEMP_LOG"
+    packages="
+        curl
+        rsync
+        vim
+    "
+    # shellcheck disable=2086
+    apt-get install -y $packages >> "$TEMP_LOG"
 }
 
 create_mash_user() {
