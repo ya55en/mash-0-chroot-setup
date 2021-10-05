@@ -14,6 +14,37 @@ built within the live chroot, using [apt][2].
 
 ## How it works
 
+### Prerequisites
+
+You need the following in order to use this framework:
+
+  - deboostrap
+  - make
+  - rsync
+  - an `.env` file based on `.env.sample`
+
+For the last item, simply do:
+
+```
+$ cd ./chroot-setup
+$ cp .env.sample .env
+```
+
+(Otherwise `make` would yell something like:
+
+```
+Makefile:8: .env: No such file or directory
+make: *** No rule to make target '.env'.  Stop.
+```
+)
+
+-----
+
+You shouldn't need to alter the values there, but take a look and feel
+free to adjust something, if neceesary (and if you know what you are
+doing.)
+
+
 ### Tarball creation phase
 
 First, a tarball is created for each test environment (once). As mentioned,
