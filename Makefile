@@ -63,10 +63,14 @@ clean-mash-timestamp:
 	rm -f $(SYNC_MASH)
 
 
+clean-downloads:
+	rm -rf $(DOWNLOAD_DIR)
+
+
 clean:  clean-tarballs
 
 
-clean-all: clean-tarballs clean-mash-timestamp
+clean-all: clean-tarballs clean-mash-timestamp clean-downloads
 
 
 .ONESHELL:
@@ -109,19 +113,34 @@ mate-desktop-down:  chroot-down
 EXCLUDED := install.sh
 SOURCES := $(shell find "$(SRC_DIR)/" -name "*.*" -a ! -name $(EXCLUDED))
 CHROOT_LOCAL := $(CHROOT)/home/mash/.local
-RSYNC_OPTS := -rlptDv --del --exclude=$(EXCLUDED)
+RSYNC_OPTS := -rlptDv
 
 #: Sync local workspace mash code with the one installed in the chroot environment.
 #: Uses a timestamp file, so NOT .PHONY ;)
 sync-mash:  $(SOURCES)
 	@touch $(SYNC_MASH)
-	@sudo rsync $(RSYNC_OPTS) $(SRC_DIR)/ $(CHROOT_LOCAL)/opt/mash/
+	@sudo rsync $(RSYNC_OPTS) --del --exclude=$(EXCLUDED) $(SRC_DIR)/ $(CHROOT_LOCAL)/opt/mash/
 
 
 #: Sync local workspace mash code with the one installed in the chroot environment.
 #: (This one is .PHONY - always executed, unconditionally.)
 sync-mash-forced:
-	@sudo rsync $(RSYNC_OPTS) $(SRC_DIR)/ $(CHROOT_LOCAL)/opt/mash/
+	@sudo rsync $(RSYNC_OPTS) --del --exclude=$(EXCLUDED) $(SRC_DIR)/ $(CHROOT_LOCAL)/opt/mash/
+
+
+#: Send new downloads to the chroot environment (if one is active) AND
+#: do the same in reverse, only adding files (no deletion).
+sync-downloads:
+	@if ! ./4make/chroot-status.sh; then \
+		CHROOT_DOWNLOAD_DIR="$(CHROOT)/home/$(MASH_USER)/.cache/mash/downloads" \
+		;sudo mkdir -p "$${CHROOT_DOWNLOAD_DIR}" \
+		;sudo chown "$(MASH_UID):$(MASH_UID)" "$${CHROOT_DOWNLOAD_DIR}" \
+		;sudo rsync "$(RSYNC_OPTS)" "$(DOWNLOAD_DIR)/" "$${CHROOT_DOWNLOAD_DIR}/" \
+		;sudo rsync "$(RSYNC_OPTS)" "$${CHROOT_DOWNLOAD_DIR}/" "$(DOWNLOAD_DIR)/" \
+		;sudo chown -R "$(MASH_UID):$(MASH_UID)" "$${CHROOT_DOWNLOAD_DIR}" \
+		;sudo chown -R "$(USER):$(USER)" "$(DOWNLOAD_DIR)/" \
+	;fi
+	@# No need to say anything as chroot-status.sh explains it all ;)
 
 
 #: Dump chroot status and return a crafted rc (see the script [1] for detials).
@@ -133,4 +152,4 @@ status:
 .PHONY:  umount-chroot prep-chroot-dir mount-chroot chroot-down
 .PHONY:  headless-up headless-down mate-desktop-up mate-desktop-down
 .PHONY:  clean-tarballs clean-mash-timestamp clean-all clean
-.PHONY:  sync-mash-forced status
+.PHONY:  sync-mash-forced sync-downloads status
