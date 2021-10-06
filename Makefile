@@ -66,29 +66,31 @@ chroot-down:  _ensure_chroot
 	make umount-chroot
 
 
+$(FOCAL_HEADLESS_TAR): export TARGET_NAME := headless
+$(FOCAL_HEADLESS_TAR): export TAR_FILE = $(TAR_FILE_TEMPLATE)
 $(FOCAL_HEADLESS_TAR):
-	make prep-chroot-dir
 	./4make/ensure-free-mem.sh 2G
+	make prep-chroot-dir
 	sudo mount -t tmpfs -o size=1G mash-ramdisk "${CHROOT}"
-	./4make/build-tarball.sh headless
+	./4make/build-tarball.sh $(TARGET_NAME)
 	sudo umount mash-ramdisk
 
 
+$(MATE_DESKTOP_TAR): export TARGET_NAME := mate-desktop
+$(MATE_DESKTOP_TAR): export TAR_FILE = $(TAR_FILE_TEMPLATE)
 $(MATE_DESKTOP_TAR):  $(FOCAL_HEADLESS_TAR)
-	set -x; make prep-chroot-dir
 	./4make/ensure-free-mem.sh 6G
+	make prep-chroot-dir
 	sudo mount -t tmpfs -o size=4G mash-ramdisk "${CHROOT}"
-	./4make/build-tarball.sh mate-desktop
+	./4make/build-tarball.sh $(TARGET_NAME)
 	sudo umount mash-ramdisk
 
 
-headless-up: TARGET_NAME := headless
-headless-up: TAR_FILE = $(TAR_FILE_TEMPLATE)
-headless-up: $(FOCAL_HEADLESS_TAR)  prep-chroot-dir
-	@echo "TAR_FILE=$(TAR_FILE)"
+headless-up: $(FOCAL_HEADLESS_TAR)
 	./4make/ensure-free-mem.sh 3G
+	make prep-chroot-dir
 	sudo mount -t tmpfs -o size=2G mash-ramdisk "${CHROOT}"
-	sudo tar -xf "$(TAR_FILE)" -C "$(CHROOT)"
+	sudo tar -xf "$(FOCAL_HEADLESS_TAR)" -C "$(CHROOT)"
 	./mount-chroot.sh
 	./4make/copy-mash-in-chroot.sh
 	make sync-downloads
@@ -98,13 +100,12 @@ headless-up: $(FOCAL_HEADLESS_TAR)  prep-chroot-dir
 headless-down:  chroot-down
 
 
-mate-desktop-up: TARGET_NAME := mate-desktop
-mate-desktop-up: TAR_FILE = $(TAR_FILE_TEMPLATE)
 mate-desktop-up:  $(MATE_DESKTOP_TAR)  prep-chroot-dir
 	echo "TAR_FILE=$(TAR_FILE)"
 	./4make/ensure-free-mem.sh 8G
+	make prep-chroot-dir
 	sudo mount -t tmpfs -o size=6G mash-ramdisk "${CHROOT}"
-	sudo tar -xzf "$$TAR_FILE" -C "$(CHROOT)"
+	sudo tar -xzf "$(MATE_DESKTOP_TAR)" -C "$(CHROOT)"
 	./mount-chroot.sh
 	./4make/copy-mash-in-chroot.sh
 	make sync-downloads
@@ -141,18 +142,25 @@ sync-mash:  _ensure_chroot
 		"$(CHROOT)/home/$(MASH_USER)/install.sh"
 
 
-# .ONESHELL:
 #: Send new downloads to the chroot environment (if one is active) AND
 #: do the same in reverse, only adding files (no deletion).
-sync-downloads: CHROOT_DOWNLOAD_DIR= $(CHROOT)/home/$(MASH_USER)/.cache/mash/downloads
+sync-downloads: CHROOT_DOWNLOAD_DIR = $(CHROOT)/home/$(MASH_USER)/.cache/mash/downloads
 sync-downloads:  _ensure_chroot
-	CHROOT_DOWNLOAD_DIR="$(CHROOT)/home/$(MASH_USER)/.cache/mash/downloads"
-	sudo mkdir -p "$${CHROOT_DOWNLOAD_DIR}" || exit 11
-	sudo chown "$(MASH_UID):$(MASH_UID)" "$${CHROOT_DOWNLOAD_DIR}"  || exit 12
-	sudo rsync "$(RSYNC_OPTS)" "$(DOWNLOAD_DIR)/" "$${CHROOT_DOWNLOAD_DIR}/" || exit 13
-	sudo rsync "$(RSYNC_OPTS)" "$${CHROOT_DOWNLOAD_DIR}/" "$(DOWNLOAD_DIR)/" || exit 14
-	sudo chown -R "$(MASH_UID):$(MASH_UID)" "$${CHROOT_DOWNLOAD_DIR}"
+	sudo mkdir -p "$(CHROOT_DOWNLOAD_DIR)"
+	sudo chown "$(MASH_UID):$(MASH_UID)" "$(CHROOT_DOWNLOAD_DIR)"
+	sudo rsync "$(RSYNC_OPTS)" "$(DOWNLOAD_DIR)/" "$(CHROOT_DOWNLOAD_DIR)/"
+	sudo rsync "$(RSYNC_OPTS)" "$(CHROOT_DOWNLOAD_DIR)/" "$(DOWNLOAD_DIR)/"
+	sudo chown -R "$(MASH_UID):$(MASH_UID)" "$(CHROOT_DOWNLOAD_DIR)"
 	sudo chown -R "$(USER):$(USER)" "$(DOWNLOAD_DIR)/"
+
+
+test-%:  _ensure_chroot
+	@case "$*" in \
+		quick | standard | full) ;; \
+		*)  echo "Unknown test level: '$*'"; exit 11 ;; \
+	esac
+	@echo "running test level '$*'"
+	sudo chroot $(CHROOT) sudo -u mash /home/$(MASH_USER)/run-tests.sh "$*"
 
 
 clean-tarballs:
@@ -178,4 +186,5 @@ status:
 .PHONY:  _ensure_chroot _ensure_no_chroot mount-chroot umount-chroot prep-chroot-dir chroot-down
 .PHONY:  clean-tarballs clean-downloads clean-all clean
 .PHONY:  headless-up headless-down mate-desktop-up mate-desktop-down
+.PHONY:  test
 .PHONY:  sync-mash sync-downloads status

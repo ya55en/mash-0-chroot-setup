@@ -47,10 +47,14 @@ create_mash_user() {
 }
 
 setup_mashuser_sudo() {
-    cat > "/etc/sudoers.d/${MASH_USER}-nopass" << EOS
+    mashuser_sudo_file="/etc/sudoers.d/${MASH_USER}-nopass"
+    cat > "$mashuser_sudo_file" << EOS
 # mash: setup p_sswdless sudo for $MASH_USER
 $MASH_USER ALL=(ALL) NOPASSWD:ALL
 EOS
+
+    chown "${MASH_UID}:${MASH_UID}" "$mashuser_sudo_file"
+    chmod 440 "$mashuser_sudo_file"
 }
 
 add_source_locale_snippet() {
@@ -63,6 +67,27 @@ cd ~
 EOS
 
     done
+}
+
+create_runtests_script() {
+    # Note that we do not source /etc/environment in this one, as this
+    # eliminates the mash PATH addition and mash cannot be found.
+    script_path="/home/${MASH_USER}/run-tests.sh"
+
+    cat >> "$script_path" << EOS
+#! /bin/sh
+. /etc/default/locale
+
+#: mash: sourcing initializing scripts from ~/.bashrc.d/*.sh
+for file in "/home/$MASH_USER/.bashrc.d/"*.sh; do
+    . "\$file"
+done
+
+cd /home/${MASH_USER}/ && ./test/e2e/smoke-e2e.sh "\$1"
+EOS
+
+    chown "${MASH_UID}:${MASH_UID}" "$script_path"
+    chmod u+x "$script_path"
 }
 
 set_hostname() {
@@ -87,6 +112,7 @@ main() {
     create_mash_user
     setup_mashuser_sudo
     add_source_locale_snippet
+    create_runtests_script
     set_hostname
     do_cleanup
 }
