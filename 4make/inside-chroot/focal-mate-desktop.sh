@@ -42,15 +42,15 @@ install_vnc_server() {
     apt-get install -y tigervnc-standalone-server xfonts-100dpi xfonts-75dpi
 }
 
-setup_proper_display_manager() {
-    #: Tune default display manager setting.
-    # Seems there's no need of this - TODO: remove when stable
-    true
+# Seems there's no need of this - TODO: remove when stable
+# setup_proper_display_manager() {
+#     #: Tune default display manager setting.
+#     true
 
-    # https://askubuntu.com/questions/1114525/reconfigure-the-display-manager-non-interactively
-    # https://phoenixnap.com/kb/how-to-install-a-gui-on-ubuntu
-    #which lightdm > /dev/null && echo "$(which lightdm)" > /etc/X11/default-display-manager
-}
+#     # https://askubuntu.com/questions/1114525/reconfigure-the-display-manager-non-interactively
+#     # https://phoenixnap.com/kb/how-to-install-a-gui-on-ubuntu
+#     #which lightdm > /dev/null && echo "$(which lightdm)" > /etc/X11/default-display-manager
+# }
 
 create_xstartup() {
     #: Create `~/.vnc/xstartup` script.
@@ -80,15 +80,37 @@ EOS
     set -e
 }
 
-setup_aliases() {
-    #: Setup useful aliases. (E.g. start and stop the VNC server as mash user.)
+# TODO: remove if not needed
+# setup_aliases() {
+#     #: Setup useful aliases. (E.g. start and stop the VNC server as mash user.)
 
-    cat >> '/root/.bashrc' << EOS
+#     cat >> '/root/.bashrc' << EOS
 
-# mash-chroot: aliases to ease vncserver run and stop:
-alias vnc-start='sudo -u mash vncserver -localhost no :2'
-alias vnc-stop='sudo -u mash vncserver -kill :2'
+# # mash-chroot: aliases to ease vncserver run and stop:
+# alias vnc-start='sudo -u mash vncserver -localhost no :2'
+# alias vnc-stop='sudo -u mash vncserver -kill :2'
+# EOS
+# }
+
+create_vnc_scripts() {
+    cat >> /usr/local/bin/start-vnc.sh << EOS
+#! /bin/sh
+# chroot-setup: script for starting vnc server
+. /etc/environment
+. /etc/default/locale
+sudo -u mash vncserver -localhost no :2
 EOS
+
+    cat >> /usr/local/bin/stop-vnc.sh << EOS
+#! /bin/sh
+# chroot-setup: script for stopping vnc server
+. /etc/environment
+. /etc/default/locale
+sudo -u mash vncserver -kill :2
+EOS
+
+    chmod +x /usr/local/bin/start-vnc.sh
+    chmod +x /usr/local/bin/stop-vnc.sh
 }
 
 cleanup() {
@@ -104,9 +126,10 @@ main() {
     install_mate_desktop_env
     ensure_x11_packages
     install_vnc_server
-    setup_proper_display_manager
+    # setup_proper_display_manager
     create_xstartup
-    setup_aliases
+    # setup_aliases
+    create_vnc_scripts
     cleanup
 }
 

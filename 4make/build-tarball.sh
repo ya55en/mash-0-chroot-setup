@@ -26,8 +26,8 @@ check_target_name() {
 print_variables() {
     printf "TARGET_NAME=%s\n" "${TARGET_NAME}"
     printf "TAR_FILE=%s\n" "${TAR_FILE}"
-    printf "FOCAL_HEADLESS_TAR=%s %s\n" "${FOCAL_HEADLESS_TAR}" "$(TARGET_NAME=headless eval "$TAR_FILE_TEMPLATE")"
-    printf "MATE_DESKTOP_TAR=%s %s\n" "${MATE_DESKTOP_TAR}" "$(eval "$TAR_FILE_TEMPLATE")"
+    printf "FOCAL_HEADLESS_TAR=%s\n" "${FOCAL_HEADLESS_TAR}"  # "$(TARGET_NAME=headless eval echo "$TAR_FILE_TEMPLATE")"
+    printf "MATE_DESKTOP_TAR=%s\n" "${MATE_DESKTOP_TAR}" # "$(eval echo "$TAR_FILE_TEMPLATE")"
     printf "CHROOT=%s\n" "${CHROOT}"
     printf "MASH_USER_HOME=%s\n" "${MASH_USER_HOME}"
     printf "CODENAME=%s\n" "${CODENAME}"

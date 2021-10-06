@@ -13,6 +13,13 @@ CHROOT="${1:-${CHROOT}}"
     exit 2
 }
 
+for dir in /proc /sys /dev /dev/pts /dev/shm; do
+    [ -e "${CHROOT}$dir" ] || {
+        printf '%s: %s NOT found, terminating.\n' "$(basename "$0")" "${CHROOT}$dir"
+        exit 7
+    }
+done
+
 sudo mount -t proc /proc "${CHROOT}/proc"
 
 sudo mount -o bind /sys "${CHROOT}/sys"

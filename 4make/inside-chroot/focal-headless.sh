@@ -53,19 +53,22 @@ $MASH_USER ALL=(ALL) NOPASSWD:ALL
 EOS
 }
 
-add_locale_source_snippet() {
-    for file in /root/.bashrc /home/${MASH_USER}/.bashrc; do
+add_source_locale_snippet() {
+    for file in '/root/.bashrc' "/home/${MASH_USER}/.bashrc"; do
         cat >> "$file" << EOS
 
 # $(basename "$0"): sourcing locale:
 source /etc/default/locale
+cd ~
 EOS
 
     done
 }
 
 set_hostname() {
-    # hstnamectl set-hostname "${CODENAME}-headless-chrooted"
+    # hostnamectl set-hostname "${CODENAME}-headless-chrooted"
+    # set but doesn't take effect on the chroot prompt :(
+    # TODO: try modifying PS1 for the chroot
     printf "%s-headless-chrooted\n" focal > /etc/hostname
 }
 
@@ -83,7 +86,7 @@ main() {
     install_apt_packages
     create_mash_user
     setup_mashuser_sudo
-    add_locale_source_snippet
+    add_source_locale_snippet
     set_hostname
     do_cleanup
 }
