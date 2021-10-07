@@ -1,11 +1,15 @@
 # ma'shmallow chroot test environments Makefile
 
-# You MUST copy `.env.sample` into `.env` before using make here!
-# Otherwise, an error pops up and make stops:
+# You MUST create a `.env.mk` file out of `.env.mk.sample` before using
+# make here!  You do that via `./scripts/create-dot-env.sh > .env.mk`.
+# Refer to `.env.sample` header comment for details.
+#
+# If you do not have the proper `.env.mk` , an error pops up and make stops:
+#
 #   Makefile: .env: No such file or directory
 #   make: *** No rule to make target '.env'.  Stop.
 
-include .env
+include .env.mk
 export
 
 SRC_DIR := ../src

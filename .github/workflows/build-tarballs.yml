@@ -19,6 +19,7 @@ jobs:
   build-focal-headless:
 
     runs-on: ubuntu-latest
+    environment: STAGE
 
     env:
       MASH_CHROOT_TAR_EXT: ${{ secrets.MASH_CHROOT_TAR_EXT }}
@@ -29,7 +30,11 @@ jobs:
       - uses: actions/checkout@v2
       - run: sudo apt-get update
       - run: sudo apt-get install -y debootstrap make curl
-      - run: ./scripts/create-dot-env.sh > .env
+      - run: ./scripts/create-dot-env.sh > .env.mk
+      - run: echo "MASH_CHROOT_TAR_EXT=${MASH_CHROOT_TAR_EXT}"
+      - run: echo "MASH_CHROOT_RELEASE_TAG=${MASH_CHROOT_RELEASE_TAG}"
       - run: make build/focal-headless.tar.${{ env.MASH_CHROOT_TAR_EXT }}
+      - run: make build/focal-mate-desktop.tar.${{ env.MASH_CHROOT_TAR_EXT }}
+      - run: echo ${{ secrets.YASSENS_GITHUB_TOKEN }} | gh auth login --with-token
       - run: gh release upload --clobber ${{ env.MASH_CHROOT_RELEASE_TAG }} ./build/focal-headless.tar.${{ env.MASH_CHROOT_TAR_EXT }}
       - run: gh release upload --clobber ${{ env.MASH_CHROOT_RELEASE_TAG }} ./build/focal-mate-desktop.tar.${{ env.MASH_CHROOT_TAR_EXT }}
