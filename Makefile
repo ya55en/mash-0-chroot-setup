@@ -66,51 +66,52 @@ chroot-down:  _ensure_chroot
 	make umount-chroot
 
 
-$(FOCAL_HEADLESS_TAR): export TARGET_NAME := headless
-$(FOCAL_HEADLESS_TAR): export TAR_FILE = $(TAR_FILE_TEMPLATE)
-$(FOCAL_HEADLESS_TAR):
+$(FOCAL_HEADLESS_TAR).$(TAR_EXT):  export TARGET_NAME := headless
+$(FOCAL_HEADLESS_TAR).$(TAR_EXT):  export TAR_FILE = $(TAR_FILE_TEMPLATE)
+$(FOCAL_HEADLESS_TAR).$(TAR_EXT):
 	./4make/ensure-free-mem.sh 2G
 	make prep-chroot-dir
 	sudo mount -t tmpfs -o size=1G mash-ramdisk "${CHROOT}"
 	./4make/build-tarball.sh $(TARGET_NAME)
-	sudo umount mash-ramdisk
+	sudo umount $(CHROOT)
 
+# .PHONY:  $(FOCAL_HEADLESS_TAR).$(TAR_EXT)  # FIXME: remove
 
-$(MATE_DESKTOP_TAR): export TARGET_NAME := mate-desktop
-$(MATE_DESKTOP_TAR): export TAR_FILE = $(TAR_FILE_TEMPLATE)
-$(MATE_DESKTOP_TAR):  $(FOCAL_HEADLESS_TAR)
+$(MATE_DESKTOP_TAR).$(TAR_EXT):  export TARGET_NAME := mate-desktop
+$(MATE_DESKTOP_TAR).$(TAR_EXT):  export TAR_FILE = $(TAR_FILE_TEMPLATE)
+$(MATE_DESKTOP_TAR).$(TAR_EXT):  $(FOCAL_HEADLESS_TAR).$(TAR_EXT)
 	./4make/ensure-free-mem.sh 6G
 	make prep-chroot-dir
 	sudo mount -t tmpfs -o size=4G mash-ramdisk "${CHROOT}"
 	./4make/build-tarball.sh $(TARGET_NAME)
-	sudo umount mash-ramdisk
+	sudo umount $(CHROOT)
 
 
-headless-up: $(FOCAL_HEADLESS_TAR)
+headless-up: $(FOCAL_HEADLESS_TAR).$(TAR_EXT)
 	./4make/ensure-free-mem.sh 3G
 	make prep-chroot-dir
 	sudo mount -t tmpfs -o size=2G mash-ramdisk "${CHROOT}"
-	sudo tar -xf "$(FOCAL_HEADLESS_TAR)" -C "$(CHROOT)"
+	sudo tar -xf "$(FOCAL_HEADLESS_TAR).$(TAR_EXT)" -C "$(CHROOT)"
 	./mount-chroot.sh
 	./4make/copy-mash-in-chroot.sh
 	make sync-downloads
-	echo 'Now do something in the chroot ;)  e.g. sudo chroot $(CHROOT) bash'
+	@printf 'Now do something in the chroot ;)  e.g.\n\n $$ sudo chroot $(CHROOT) bash\n\n'
 
 
 headless-down:  chroot-down
 
 
-mate-desktop-up:  $(MATE_DESKTOP_TAR)  prep-chroot-dir
+mate-desktop-up:  $(MATE_DESKTOP_TAR).$(TAR_EXT)  prep-chroot-dir
 	echo "TAR_FILE=$(TAR_FILE)"
 	./4make/ensure-free-mem.sh 8G
 	make prep-chroot-dir
 	sudo mount -t tmpfs -o size=6G mash-ramdisk "${CHROOT}"
-	sudo tar -xzf "$(MATE_DESKTOP_TAR)" -C "$(CHROOT)"
+	sudo tar -xzf "$(MATE_DESKTOP_TAR).$(TAR_EXT)" -C "$(CHROOT)"
 	./mount-chroot.sh
 	./4make/copy-mash-in-chroot.sh
 	make sync-downloads
 	sudo chroot "$(CHROOT)" start-vnc.sh
-	echo 'Now do something in the chroot ;)  e.g. sudo chroot $(CHROOT) bash'
+	@printf 'Now do something in the chroot ;)  e.g.\n\n $$ sudo chroot $(CHROOT) bash\n\n'
 
 
 mate-desktop-down:  _ensure_chroot
@@ -146,6 +147,7 @@ sync-mash:  _ensure_chroot
 #: do the same in reverse, only adding files (no deletion).
 sync-downloads: CHROOT_DOWNLOAD_DIR = $(CHROOT)/home/$(MASH_USER)/.cache/mash/downloads
 sync-downloads:  _ensure_chroot
+	mkdir -p "$(DOWNLOAD_DIR)"
 	sudo mkdir -p "$(CHROOT_DOWNLOAD_DIR)"
 	sudo chown "$(MASH_UID):$(MASH_UID)" "$(CHROOT_DOWNLOAD_DIR)"
 	sudo rsync "$(RSYNC_OPTS)" "$(DOWNLOAD_DIR)/" "$(CHROOT_DOWNLOAD_DIR)/"
@@ -163,7 +165,7 @@ test-%:  _ensure_chroot
 	sudo chroot $(CHROOT) sudo -u mash /home/$(MASH_USER)/run-tests.sh "$*"
 
 
-clean-tarballs:
+clean-build:
 	rm -rf $(BUILD_DIR); mkdir -p $(BUILD_DIR)
 
 
@@ -171,10 +173,10 @@ clean-downloads:
 	rm -rf $(DOWNLOAD_DIR); mkdir -p $(DOWNLOAD_DIR)
 
 
-clean:  clean-tarballs
+clean:  clean-build
 
 
-clean-all: clean-tarballs clean-downloads
+clean-all: clean-build clean-downloads
 
 
 #: Dump chroot status and return a crafted rc (see the script [1] for detials).
@@ -184,7 +186,7 @@ status:
 
 
 .PHONY:  _ensure_chroot _ensure_no_chroot mount-chroot umount-chroot prep-chroot-dir chroot-down
-.PHONY:  clean-tarballs clean-downloads clean-all clean
+.PHONY:  clean-build clean-downloads clean-all clean
 .PHONY:  headless-up headless-down mate-desktop-up mate-desktop-down
 .PHONY:  test
 .PHONY:  sync-mash sync-downloads status

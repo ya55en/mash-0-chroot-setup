@@ -3,36 +3,43 @@
 PAUSE_SEC=4 # secs to wait for Ctr-C before final umount
 
 TARGET_NAME="$1"
+# TAR_EXT=${TAR_EXT:-z}
+
+__name__="$(basename "$0")"
 
 # shellcheck disable=2027,2086
-eval "TAR_FILE="${TAR_FILE_TEMPLATE}""
+# eval "_TAR_FILE="${TAR_FILE_TEMPLATE}""
+_TAR_FILE="${TAR_FILE}.${TAR_EXT}"
 MASH_USER_HOME="/home/${MASH_USER}"
+
+print_variables() {
+    printf '%s: Variables:' "$__name__"
+    printf " TARGET_NAME=%s\n" "${TARGET_NAME}"
+    printf " TARGET_NAME=%s\n" "${TARGET_NAME}"
+    printf " _TAR_FILE=%s\n" "${_TAR_FILE}"
+    printf " TAR_EXT=%s\n" "${TAR_EXT}"
+    printf " FOCAL_HEADLESS_TAR=%s\n" "${FOCAL_HEADLESS_TAR}" # "$(TARGET_NAME=headless eval echo "$TAR_FILE_TEMPLATE")"
+    printf " MATE_DESKTOP_TAR=%s\n" "${MATE_DESKTOP_TAR}"     # "$(eval echo "$TAR_FILE_TEMPLATE")"
+    printf " CHROOT=%s\n" "${CHROOT}"
+    printf " MASH_USER_HOME=%s\n" "${MASH_USER_HOME}"
+    printf " CODENAME=%s\n" "${CODENAME}"
+    printf " MIRROR_URL=%s\n" "${MIRROR_URL}"
+    printf " MASH_PSSWD_HASH=%s\n" "${MASH_PSSWD_HASH}"
+}
 
 check_target_name() {
     [ -n "$TARGET_NAME" ] || {
-        echo "$(basename "$0"): Missing required argument: TARGET_NAME"
+        echo "$__name__: Missing required argument: TARGET_NAME"
         exit 2
     }
     case "${TARGET_NAME}" in
         headless | mate-desktop) ;;
 
         *)
-            echo "$(basename "$0"): Illegal required argument: TARGET_NAME='$TARGET_NAME'! Terminating."
+            echo "$__name__: Illegal required argument: TARGET_NAME='$TARGET_NAME'! Terminating."
             exit 2
             ;;
     esac
-}
-
-print_variables() {
-    printf "TARGET_NAME=%s\n" "${TARGET_NAME}"
-    printf "TAR_FILE=%s\n" "${TAR_FILE}"
-    printf "FOCAL_HEADLESS_TAR=%s\n" "${FOCAL_HEADLESS_TAR}"  # "$(TARGET_NAME=headless eval echo "$TAR_FILE_TEMPLATE")"
-    printf "MATE_DESKTOP_TAR=%s\n" "${MATE_DESKTOP_TAR}" # "$(eval echo "$TAR_FILE_TEMPLATE")"
-    printf "CHROOT=%s\n" "${CHROOT}"
-    printf "MASH_USER_HOME=%s\n" "${MASH_USER_HOME}"
-    printf "CODENAME=%s\n" "${CODENAME}"
-    printf "MIRROR_URL=%s\n" "${MIRROR_URL}"
-    printf "MASH_PSSWD_HASH=%s\n" "${MASH_PSSWD_HASH}"
 }
 
 create_chroot_tree() {
@@ -40,13 +47,19 @@ create_chroot_tree() {
         ./4make/ensure-free-mem.sh 2G
         sudo mount -t tmpfs -o size=768M mash-ramdisk "${CHROOT}"
         sudo debootstrap "${CODENAME}" "${CHROOT}" "${MIRROR_URL}"
+
         # A shortcut for testing; TODO: remove when stable
         # sudo tar xf ${BUILD_DIR}/OLD-focal-headless.tgz -C "${CHROOT}"
-    else
+
+    elif [ "$TARGET_NAME" = mate-desktop ]; then
         ./4make/ensure-free-mem.sh 8G
         sudo mount -t tmpfs -o size=6G mash-ramdisk "${CHROOT}"
         #sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tgz" -g /dev/null -C "${CHROOT}"
-        sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tgz" -C "${CHROOT}"
+        # sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tgz" -C "${CHROOT}"
+        sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tar.${TAR_EXT}" -C "${CHROOT}"
+    else
+        printf '%s: %s\n' "$__name__" "Illegal/unknown TARGET_NAME=$TARGET_NAME"
+        exit 4
     fi
 }
 
@@ -94,15 +107,15 @@ work_inside_chroot() {
 
 create_final_tarball() {
     # shellcheck disable=2027,2086
-    printf '\nTAR_FILE=<<%s>>\n\n' "$TAR_FILE"
-    [ -e "${TAR_FILE}" ] && rm "${TAR_FILE}"
-    mkdir -p "$(dirname "${TAR_FILE}")"
+    printf '\n_TAR_FILE=<<%s>>\n\n' "$_TAR_FILE"
+    [ -e "${_TAR_FILE}" ] && rm "${_TAR_FILE}"
+    mkdir -p "$(dirname "${_TAR_FILE}")"
     # _LEVEL_OPT="--level=$([ "$TARGET_NAME" = headless ] && printf '0' || printf '1' )"
-    if [ "$TARGET_NAME" = headless ]; then rm -f "${TAR_METADATA_FILE}"; fi
-    #sudo tar -czf "${TAR_FILE}" -g "${TAR_METADATA_FILE}" -C "${CHROOT}/" . #  "${_LEVEL_OPT}"
-    sudo tar -czf "${TAR_FILE}" -C "${CHROOT}/" .
+    # if [ "$TARGET_NAME" = headless ]; then rm -f "${TAR_METADATA_FILE}"; fi
+    #sudo tar -czf "${_TAR_FILE}" -g "${TAR_METADATA_FILE}" -C "${CHROOT}/" . #  "${_LEVEL_OPT}"
+    sudo tar -caf "${_TAR_FILE}" -C "${CHROOT}/" .
     # tar --listed-incremental=snapshot.file -cvzf backup.1.tar.gz /path/to/dir
-    sudo chown "${USER}:${USER}" "${TAR_FILE}"
+    sudo chown "${USER}:${USER}" "${_TAR_FILE}"
     # sudo chown "${USER}:${USER}" "${TAR_METADATA_FILE}"
 }
 
@@ -123,7 +136,7 @@ main() {
     sudo umount "${CHROOT}"
 
     set +x
-    echo "** DONE creating ${TAR_FILE}. **"
+    echo "** DONE creating ${_TAR_FILE}. **"
 }
 
 main
