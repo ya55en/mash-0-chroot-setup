@@ -84,9 +84,9 @@ $(FOCAL_HEADLESS_TAR).$(TAR_EXT):
 $(MATE_DESKTOP_TAR).$(TAR_EXT):  export TARGET_NAME := mate-desktop
 $(MATE_DESKTOP_TAR).$(TAR_EXT):  export TAR_FILE = $(TAR_FILE_TEMPLATE)
 $(MATE_DESKTOP_TAR).$(TAR_EXT):  $(FOCAL_HEADLESS_TAR).$(TAR_EXT)
-	./4make/ensure-free-mem.sh 6G
+	./4make/ensure-free-mem.sh 3G
 	make prep-chroot-dir
-	sudo mount -t tmpfs -o size=4G mash-ramdisk "${CHROOT}"
+	sudo mount -t tmpfs -o size=2G mash-ramdisk "${CHROOT}"
 	./4make/build-tarball.sh $(TARGET_NAME)
 	sudo umount $(CHROOT)
 
