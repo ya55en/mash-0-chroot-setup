@@ -7,13 +7,13 @@ name: build-tarballs
 on:
   push:
     branches:
-      # any branches
+      # any branches; $default-branch doesn't seem to work
       - main
       - 46-tarball-ci-action
       # - '*'
   schedule:
-    # every monday, thursday, friday, 4:15am EEST
-    - cron:  '15 1 * * 1,3,5'
+    # every monday, thursday, friday, 3:15am EEST
+    - cron:  '15 0 * * 1,3,5'
 
 jobs:
   build-focal-headless:
@@ -22,19 +22,19 @@ jobs:
     environment: STAGE
 
     env:
-      MASH_CHROOT_TAR_EXT: ${{ secrets.MASH_CHROOT_TAR_EXT }}
+      MASH_CHROOT_TAR_EXT: xz
       MASH_CHROOT_USER_PSSWD_HASH: ${{ secrets.MASH_CHROOT_USER_PSSWD_HASH }}
       MASH_CHROOT_RELEASE_TAG: ${{ secrets.MASH_CHROOT_RELEASE_TAG }}
 
     steps:
       - uses: actions/checkout@v2
+        # with:
+        #   ref: main
       - run: sudo apt-get update
       - run: sudo apt-get install -y debootstrap make curl
       - run: ./scripts/create-dot-env.sh > .env.mk
-      - run: echo "MASH_CHROOT_TAR_EXT=${MASH_CHROOT_TAR_EXT}"
-      - run: echo "MASH_CHROOT_RELEASE_TAG=${MASH_CHROOT_RELEASE_TAG}"
-      - run: make build/focal-headless.tar.${{ env.MASH_CHROOT_TAR_EXT }}
-      - run: make build/focal-mate-desktop.tar.${{ env.MASH_CHROOT_TAR_EXT }}
+      - run: make build/focal-headless.tar.${MASH_CHROOT_TAR_EXT}
+      - run: make build/focal-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
       - run: echo ${{ secrets.YASSENS_GITHUB_TOKEN }} | gh auth login --with-token
-      - run: gh release upload --clobber ${{ env.MASH_CHROOT_RELEASE_TAG }} ./build/focal-headless.tar.${{ env.MASH_CHROOT_TAR_EXT }}
-      - run: gh release upload --clobber ${{ env.MASH_CHROOT_RELEASE_TAG }} ./build/focal-mate-desktop.tar.${{ env.MASH_CHROOT_TAR_EXT }}
+      - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/focal-headless.tar.${MASH_CHROOT_TAR_EXT}
+      - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/focal-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
