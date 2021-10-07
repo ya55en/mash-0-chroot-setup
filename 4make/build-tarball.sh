@@ -44,16 +44,16 @@ check_target_name() {
 
 create_chroot_tree() {
     if [ "$TARGET_NAME" = headless ]; then
-        ./4make/ensure-free-mem.sh 2G
-        sudo mount -t tmpfs -o size=768M mash-ramdisk "${CHROOT}"
+        # ./4make/ensure-free-mem.sh 2G
+        # sudo mount -t tmpfs -o size=768M mash-ramdisk "${CHROOT}"
         sudo debootstrap "${CODENAME}" "${CHROOT}" "${MIRROR_URL}"
 
         # A shortcut for testing; TODO: remove when stable
         # sudo tar xf ${BUILD_DIR}/OLD-focal-headless.tgz -C "${CHROOT}"
 
     elif [ "$TARGET_NAME" = mate-desktop ]; then
-        ./4make/ensure-free-mem.sh 8G
-        sudo mount -t tmpfs -o size=6G mash-ramdisk "${CHROOT}"
+        # ./4make/ensure-free-mem.sh 3G
+        # sudo mount -t tmpfs -o size=3G mash-ramdisk "${CHROOT}"
         #sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tgz" -g /dev/null -C "${CHROOT}"
         # sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tgz" -C "${CHROOT}"
         sudo tar -xf "${BUILD_DIR}/${CODENAME}-headless.tar.${TAR_EXT}" -C "${CHROOT}"
@@ -133,7 +133,7 @@ main() {
 
     echo "==> Press Ctrl-C within ${PAUSE_SEC} sec. to stop before unmounting the chroot..."
     sleep "${PAUSE_SEC}"
-    sudo umount "${CHROOT}"
+    # sudo umount "${CHROOT}"
 
     set +x
     echo "** DONE creating ${_TAR_FILE}. **"

@@ -7,7 +7,7 @@
 stderr='/dev/stderr'
 wrong_arg=2
 mem_unavailable=9
-required="$1"
+required_arg="$1"
 
 is_numeric() {
     test -n "$1" -a "$1" -eq "$1" 2> /dev/null
@@ -23,19 +23,19 @@ assert() {
     cmd="$@"
 
     if ! "$cmd"; then
-        echo "(rc=$?) assertion FAILED: $cmd" > $stderr
+        echo "(rc=$?) assertion FAILED: $cmd" >> $stderr
         return $?
     fi
 }
 
 main() {
-    if [ -z "$required" ]; then
+    if [ -z "$required_arg" ]; then
         errmsg='Missing argument: Provide minimal required memory (in GB)'
         printf "%s\n" "${errmsg}" >> $stderr
         return $wrong_arg
     fi
 
-    case "${required}" in
+    case "${required_arg}" in
         *K | *k) # kilobytes
             factor=1
             ;;
@@ -46,19 +46,22 @@ main() {
             factor=$((1024 * 1024))
             ;;
         *)
-            echo "Unknown/illegal units in '${required}'" > $stderr
+            echo "Unknown/illegal units in '${required_arg}'" > $stderr
             return $wrong_arg
             ;;
     esac
 
-    required="$(chop_last "$required")"
+    required="$(chop_last "$required_arg")"
     if ! is_numeric "${required}"; then
-        echo "Illegal mem size expression; $1" > $stderr
+        echo "Illegal mem size expression; $1" >> $stderr
         return $wrong_arg
     fi
 
     avail=$(awk '/^MemAvailable:/ {printf "%.0f", $2/'$factor'}' /proc/meminfo)
-    [ "$avail" -ge "$required" ] || return $mem_unavailable
+    [ "$avail" -ge "$required" ] || {
+        printf 'Insufficent memory: required=%s, available=%s\n' "$required_arg" "$avail"
+        return $mem_unavailable
+    }
 }
 
 main "$@"
