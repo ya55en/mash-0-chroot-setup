@@ -3,5 +3,5 @@
 build/
 downloads/
 
-.env
+.env.mk
 sync-mash

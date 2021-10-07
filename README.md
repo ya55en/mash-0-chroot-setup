@@ -21,13 +21,13 @@ You need the following in order to use this framework:
   - deboostrap
   - make
   - rsync
-  - an `.env` file based on `.env.sample`
+  - an `.env.mk` file based on `.env.mk.sample`
 
 For the last item, simply do:
 
 ```
 $ cd ./chroot-setup
-$ cp .env.sample .env
+$ ./scripts/create-dot-env.sh > .env.mk
 ```
 
 (Otherwise `make` would yell something like:

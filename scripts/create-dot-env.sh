@@ -1,8 +1,9 @@
 #! /bin/sh
-#: Parse `.env.sample` and spit an output to stdout which is suitable
+#: Parse `.env.mk.sample` and spit an output to stdout which is suitable
 #: to become the `.env` of the chroot-setup.
 
 _name_="$(basename "$0")"
+ENV_SAMPLE_FILE='.env.mk.sample'
 
 die() {
     rc="$1"
@@ -111,7 +112,7 @@ main() {
         fi
         echo "${lhs} ${assign} ${rhs}"
 
-    done < .env.sample
+    done < "$ENV_SAMPLE_FILE"
     IFS="$OIFS_2"
 }
 
