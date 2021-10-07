@@ -74,30 +74,39 @@ used further.
 Typically, the local `Makefile` targets are used to bring an environment
 AND meanwhile, create the corresponding tarball if it is not yet created:
 
+- `make status` will tell if a chroot is active and what it is (e.g.
+  headless or mate-desktop).
 - `make headless-up` would, if necessary, first build the headless env
   tarball; then use that to set up a headless chroot environment.
 - `make headless-down` shuts that environment down (if it is up).
 - `make mate-desktop-up` would, if necessary, first build a stripped version
-   of the mate dekstop environment into a tarball,  then use that to set up
+   of the mate dekstop environment into a tarball, then use that to set up
    a mate desktop enabled chroot environment.
 - `make mate-desktop-down` shuts that environment down (if it is up).
 
 
 ## Known issues
 
-The tarball creation system currently uses [incremental backup scheme][3]
-but (a) it shows an error (probably a harmless one but still the build is
-not fully clean); (b) does not show a geat degree of storage saving.
+No known issues.
+
+(We have moved to a non-incremental `tar` archives, so the issue with the
+error message during un-archiving is no longer there.)
 
 
 ## TODO
 
 Lots of things, to be populated later. Most importantly:
 
+- Convert the `chroot-setup` directpry into a submodule within it's own
+  git repository hosted on github.
+
+- Experiment with xz compression.
+
+- Create releases for the `chroot-setup` project with the two archived
+  chroot environments.
+
 - Have test execution targets directly into the `Makefile` and use these
   to run e2e and other tests;
-
-- Experiment with non-incremetnal tarballs.
 
 
 [1]: <https://wiki.debian.org/Debootstrap> "Debootstrap"
