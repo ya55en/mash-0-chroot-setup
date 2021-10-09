@@ -1,0 +1,36 @@
+# Makefile variables - default (sample) values.
+# Note that the syntax is Makefile, NOT unix shell!
+#
+# You MUST use double dollar ($$) and curly braces ({}) for shell
+# variables, like:
+#   $${SHELL_VAR}
+# or the ./scripts/create-dot-env.sh will not make the substitution
+# when creating `.env.mk` out of `.env.mk.sample`.
+#
+# Execute `./scripts/create-dot-env.sh` to generate an initial `.env`
+# file. You should be good to go then, the defaults should work for
+# (almost) all cases (but feel free to tune anything, if needed).
+
+CHROOT := /tmp/mash-ramdisk
+CODENAME := focal
+MIRROR_URL := http://bg.archive.ubuntu.com/ubuntu
+DOWNLOAD_DIR := ./downloads
+
+MASH_USER := mash
+MASH_UID := 1234
+MASH_PSSWD_HASH_DEFAULT := $$6$$coq/LvbNylektqbU$$yZ02jL5Q2mSPlL1VnLEb9jnenFqDRbslk9jbRQ.RCRNMtxwCH//NWYK.zowhjFFm6N5RI9WPVI4kWgcX2jDoV/
+MASH_PSSWD_HASH := $(MASH_PSSWD_HASH_DEFAULT)
+
+BUILD_DIR := build
+
+# Note that tar archive filename extention (.gz, .xz) can be overriden later
+# on, so not added here. TAR_EXT can be one of gz, xz, bz2 (see 'man tar').
+#
+# Some statistics:
+#  File size: focal-headless.tgz is 132Mb, focal-mate-desktop.txz is 90Mb (-31%)
+#  Un-archiaval time:  focal-headless.tgz: 2.6s (-62%), focal-mate-desktop.txz 6.8s
+
+TAR_EXT := gz
+TAR_FILE_TEMPLATE = $(BUILD_DIR)/$(CODENAME)-$(TARGET_NAME).tar
+FOCAL_HEADLESS_TAR = $(BUILD_DIR)/$(CODENAME)-headless.tar
+MATE_DESKTOP_TAR = $(BUILD_DIR)/$(CODENAME)-mate-desktop.tar
