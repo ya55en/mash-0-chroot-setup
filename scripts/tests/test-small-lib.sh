@@ -65,6 +65,7 @@ test_assign_multiple__case_leftover() {
     print_pass
 }
 
+# shellcheck disable=2034
 test_assign_multiple__case_not_enough_data() {
     _curr_test_=test_assign_multiple__case_not_enough_data
     no=$(expr $no + 1)

@@ -29,8 +29,8 @@ test_should_be_processed() {
     _curr_test_=test_should_be_processed
     no=$(expr $no + 1)
 
-    should_be_processed 'TAR_EXT := $${MASH_CHROOT_TAR_EXT:-gz}' || echo "RC=$?"
-    should_be_processed 'MASH_PSSWD_HASH := $${MASH_CHROOT_USER_PSSWD_HASH:-\$(MASH_PSSWD_HASH_DEFAULT)}' || echo "RC=$?"
+    assert_true should_be_processed 'TAR_EXT := $${MASH_CHROOT_TAR_EXT:-gz}'
+    assert_true should_be_processed 'MASH_PSSWD_HASH := $${MASH_CHROOT_USER_PSSWD_HASH:-\$(MASH_PSSWD_HASH_DEFAULT)}'
     assert_false should_be_processed 'MASH_PSSWD_HASH_DEFAULT := $$6$$coq/LvbNy'
     assert_false should_be_processed 'MASH_USER := mash'
     # assert_true should_be_processed 'MASH_USER := mash'  # fails - for checking how it runs with a failng test
@@ -38,7 +38,7 @@ test_should_be_processed() {
     print_pass
 }
 
-# shellcheck disable=2003,2016
+# shellcheck disable=2003,2016,2034
 test_e2e() {
     _curr_test_=test_e2e
     no=$(expr $no + 1)
