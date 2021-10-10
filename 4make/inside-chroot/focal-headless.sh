@@ -58,7 +58,8 @@ EOS
 }
 
 add_source_locale_snippet() {
-    for file in '/root/.bashrc' "/home/${MASH_USER}/.bashrc"; do
+    files="/root/.bashrc /home/${MASH_USER}/.bashrc"
+    for file in $files; do
         cat >> "$file" << EOS
 
 # $(basename "$0"): sourcing locale:

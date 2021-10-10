@@ -48,6 +48,20 @@ should_be_processed() {
     has_substr "$line" '=' && has_substr "$line" '$${'
 }
 
+#do_positive_test() {
+#    case_no=$(expr $case_no + 1)
+#    if should_be_processed "$1"; then echo " case-$case_no OK"; else
+#        echo " case-$case_no FAILED"
+#    fi
+#}
+#
+#do_negative_test() {
+#    case_no=$(expr $case_no + 1)
+#    if ! should_be_processed "$1"; then echo " case-$case_no OK"; else
+#        echo " case-$case_no FAILED"
+#    fi
+#}
+
 main() {
     local OIFS="$IFS"
     local IFS=''

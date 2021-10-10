@@ -15,65 +15,43 @@ echo "$_tcde_name_: _name_=[$_name_], _tcde_name_=[$_tcde_name_]"
 
 # shellcheck disable=2003,2016
 test_split_line() {
-    printf '%s\n' 'test_split_line:'
-    local no=0
+    _curr_test_=test_split_line
+    no=$(expr $no + 1)
 
-    _assert_equal() {
-        no=$(expr $no + 1)
-        expected="$1"
-        actual="$2"
-        if [ "$actual" = "$expected" ]; then echo " case-$no OK"; else
-            echo " case-$no FAILED: [$actual] != [$expected]"
-        fi
-    }
+    assert_equal 'TAR_EXT := $${MASH_CHROOT_TAR_EXT:-gz}' "$(split_line 'TAR_EXT:=$${MASH_CHROOT_TAR_EXT:-gz}')"
+    assert_equal 'TAR_EXT  :=  $${MASH_CHROOT_TAR_EXT:-gz}' "$(split_line 'TAR_EXT := $${MASH_CHROOT_TAR_EXT:-gz}')"
 
-    _assert_equal 'TAR_EXT := $${MASH_CHROOT_TAR_EXT:-gz}' "$(split_line 'TAR_EXT:=$${MASH_CHROOT_TAR_EXT:-gz}')"
-    rc=$(expr $rc + $?)
-    _assert_equal 'TAR_EXT  :=  $${MASH_CHROOT_TAR_EXT:-gz}' "$(split_line 'TAR_EXT := $${MASH_CHROOT_TAR_EXT:-gz}')"
-    rc=$(expr $rc + $?)
-    return $rc
+    print_pass
 }
 
 # shellcheck disable=2003,2016
 test_should_be_processed() {
-    printf '%s\n' 'test_should_be_processed:'
-    local rc=0
-    local no=0 # test case number
+    _curr_test_=test_should_be_processed
+    no=$(expr $no + 1)
 
-    do_positive_test() {
-        no=$(expr $no + 1)
-        if should_be_processed "$1"; then echo " case-$no OK"; else
-            echo " case-$no FAILED"
-            rc=$(expr $rc + 1)
-        fi
-    }
+    should_be_processed 'TAR_EXT := $${MASH_CHROOT_TAR_EXT:-gz}' || echo "RC=$?"
+    should_be_processed 'MASH_PSSWD_HASH := $${MASH_CHROOT_USER_PSSWD_HASH:-\$(MASH_PSSWD_HASH_DEFAULT)}' || echo "RC=$?"
+    assert_false should_be_processed 'MASH_PSSWD_HASH_DEFAULT := $$6$$coq/LvbNy'
+    assert_false should_be_processed 'MASH_USER := mash'
+    # assert_true should_be_processed 'MASH_USER := mash'  # fails - for checking how it runs with a failng test
 
-    do_negative_test() {
-        no=$(expr $no + 1)
-        if ! should_be_processed "$1"; then echo " case-$no OK"; else
-            echo " case-$no FAILED"
-            rc=$(expr $rc + 1)
-        fi
-    }
-
-    do_positive_test 'TAR_EXT := $${MASH_CHROOT_TAR_EXT:-gz}'
-    do_positive_test 'MASH_PSSWD_HASH := $${MASH_CHROOT_USER_PSSWD_HASH:-\$(MASH_PSSWD_HASH_DEFAULT)}'
-    do_negative_test 'MASH_PSSWD_HASH_DEFAULT := $$6$$coq/LvbNy'
-    do_negative_test 'MASH_USER := mash'
-    # do_positive_test 'MASH_USER := mash'  # fails - for checking how it runs with a failng test
-    return $rc
+    print_pass
 }
 
+# shellcheck disable=2003,2016
 test_e2e() {
+    _curr_test_=test_e2e
+    no=$(expr $no + 1)
     local rc=0
+
     local tmp_file='/tmp/create-dot-env-4test.dump'
     local ref_file='scripts/tests/expected-output-create-dot-env.dump'
 
     main > "$tmp_file"
     if diff -u "$tmp_file" "$ref_file"; then
-        printf 'e2e test OK\n'
+        print_pass
     else
-        printf 'e2e test FAILED; diff is above ^^\n'
+        print_fail 'e2e test FAILED; diff is above ^^'
         rc=1
     fi
     rm $tmp_file
@@ -82,24 +60,12 @@ test_e2e() {
 
 # shellcheck disable=2003,2086
 test() {
-    local rc=0
+    set +x
+    local no=0
 
-    echo ''
     test_split_line
-    rc=$(expr $rc + $?)
-    echo ''
-
     test_should_be_processed
-    rc=$(expr $rc + $?)
-    echo ''
-
     test_e2e
-    rc=$(expr $rc + $?)
-
-    printf "\n%s:" "$_tcde_name_"
-    [ "$rc" = 0 ] && printf ' SUCCESS!' || printf '  Testing FAILED.'
-    printf '  Failed tests: %u\n' $rc
-    return $rc
 }
 
 if [ "$_name_" = "$_tcde_name_" ]; then
