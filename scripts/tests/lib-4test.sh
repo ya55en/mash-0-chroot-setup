@@ -55,6 +55,7 @@ check_two_args_are_num() {
 assert_equal() {
     local actual="$1"
     local expected="$2"
+    # printf '===> assert_equal [%s] [%s] called\n' "$actual" "$expected"
 
     if [ "$actual" != "$expected" ]; then
         print_fail "assert_equal FAILED: '$actual' != '$expected'"
@@ -100,21 +101,25 @@ assert_not_equal_num() {
 }
 
 assert_true() {
-    local cmd="$*"
-
-    $cmd || {
-        print_fail "assert_true FAILED for [$cmd]"
+    "$@" || {
+        print_fail "assert_true FAILED for [$*]"
         return 1
     }
 }
 
 assert_false() {
-    local cmd="$*"
-
-    ! $cmd || {
-        print_fail "assert_true FAILED for [$cmd]"
+    ! "$@" || {
+        print_fail "assert_false FAILED for [$*]"
         return 1
     }
+
+    # Trying to provide a way to have a dooubkle ! but failed
+    # if "$@"; then
+    #     print_fail "assert_false FAILED for [$cmd]"
+    #     return 1
+    # else
+    #     return 0
+    # fi
 }
 
 assert_rc_equal() {
@@ -166,6 +171,7 @@ test_assert_equal__positive() {
     assert_equal tata tata
     assert_equal 123 123
     assert_equal '' ''
+    assert_equal 'tata 123' 'tata 123'
 
     # shellcheck disable=2119
     print_pass
@@ -298,6 +304,21 @@ test_assert_true__negative() {
     print_pass
 }
 
+test_assert_true__special_case() {
+    _curr_test_=test_assert_true__special_case
+    # shellcheck disable=2003,2086
+    no=$(expr $no + 1)
+
+    accepts_complex_string() {
+        # echo "accepts_complex_string: arg1=[$1], arg2=[$2]"
+        [ "$1" = 'abc def' ]
+    }
+    assert_true accepts_complex_string 'abc def'
+
+    # shellcheck disable=2119
+    print_pass
+}
+
 test_assert_false__positive() {
     _curr_test_=test_assert_false__positive
     # shellcheck disable=2003,2086
@@ -319,6 +340,21 @@ test_assert_false__negative() {
     assert_false true 1> /dev/null && print_fail 'assert_false true DID NOT fail'
     assert_false [ 3 -eq 3 ] 1> /dev/null && print_fail 'assert_false [ 3 -eq 3 ] DID NOT fail'
     assert_false [ asd = asd ] 1> /dev/null && print_fail 'assert_false [ asd = asd ] DID NOT fail'
+
+    # shellcheck disable=2119
+    print_pass
+}
+
+test_assert_false__special_case() {
+    _curr_test_=test_assert_false__special_case
+    # shellcheck disable=2003,2086
+    no=$(expr $no + 1)
+
+    accepts_complex_string() {
+        assert_equal "$1" 'abc def'
+        return 1
+    }
+    assert_false accepts_complex_string 'abc def'
 
     # shellcheck disable=2119
     print_pass
@@ -352,10 +388,24 @@ test_assert_rc_equal__negative() {
     print_pass
 }
 
+test_assert_rc_equal__special_case() {
+    _curr_test_=test_assert_false__special_case
+    # shellcheck disable=2003,2086
+    no=$(expr $no + 1)
+
+    accepts_complex_string() {
+        [ "$1" = 'abc def' ]
+    }
+    assert_rc_equal 0 accepts_complex_string 'abc def'
+
+    # shellcheck disable=2119
+    print_pass
+}
+
 # shellcheck disable=2003,2086
 test() {
     set +x
-    local rc=0
+    local no=0
 
     test_is_num__true
     test_is_num__false
@@ -369,10 +419,13 @@ test() {
     test_assert_not_equal_num__negative
     test_assert_true__positive
     test_assert_true__negative
+    test_assert_true__special_case
     test_assert_false__positive
     test_assert_false__negative
+    test_assert_false__special_case
     test_assert_rc_equal__positive
     test_assert_rc_equal__negative
+    test_assert_rc_equal__special_case
 }
 
 if [ "$_name_" = "$_l4t_name_" ]; then
