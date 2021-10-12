@@ -65,7 +65,8 @@ test() {
 
     test_split_line
     test_should_be_processed
-    test_e2e
+    # Consider GITHUB_ACTIONS - see issue ya55en/mash-0-chroot-setup#3
+    [ "$GITHUB_ACTIONS" = true ] || test_e2e
 }
 
 if [ "$_name_" = "$_tcde_name_" ]; then
