@@ -171,6 +171,10 @@ test-%:  _ensure_chroot
 	sudo chroot $(CHROOT) sudo -u mash /home/$(MASH_USER)/run-tests.sh "$*"
 
 
+test-tools:
+	./scripts/tests/zz-test-all.sh | ./scripts/tests/tapview
+
+
 clean-build:
 	rm -rf $(BUILD_DIR); mkdir -p $(BUILD_DIR)
 
@@ -194,5 +198,5 @@ status:
 .PHONY:  _ensure_chroot _ensure_no_chroot mount-chroot umount-chroot prep-chroot-dir chroot-down
 .PHONY:  clean-build clean-downloads clean-all clean
 .PHONY:  headless-up headless-down mate-desktop-up mate-desktop-down
-.PHONY:  test
+.PHONY:  test-% test-tools
 .PHONY:  sync-mash sync-downloads status
