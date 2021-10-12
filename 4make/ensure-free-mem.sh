@@ -29,6 +29,11 @@ assert() {
 }
 
 main() {
+    if [ -n "$GITHUB_ACTIONS" ]; then
+        echo "$(basename "$0"): Github CI environment detected; skipping check."
+        return 0
+    fi
+
     if [ -z "$required_arg" ]; then
         errmsg='Missing argument: Provide minimal required memory (in GB)'
         printf "%s\n" "${errmsg}" >> $stderr

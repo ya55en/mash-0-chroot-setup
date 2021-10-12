@@ -114,7 +114,7 @@ main() {
     create_mash_user
     setup_mashuser_sudo
     add_source_locale_snippet
-    # create_runtests_script
+    # create_runtests_script  # TODO: remove here and above
     set_hostname
     do_cleanup
 }

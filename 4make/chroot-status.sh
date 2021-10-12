@@ -23,11 +23,18 @@ count="$(mount | grep -c "$CHROOT")"
 
 if [ -e './umount-chroot.sh' ]; then
     expected="$(grep -Ec '^\s*sudo\s+umount' './umount-chroot.sh')"
+
 else
     expected=6
     printf '%s: Warning: Cannot find %s; setting expected=%u.\n' \
         "$_NAME_" "$UMOUNT_SCRIPT" "$expected"
 fi
+
+
+# On Github CI environment, we do NOT mount a ram disk,
+# hence the expected number needs to be decremented
+[ -z "$GITHUB_ACTIONS" ] || expected=$(($expected  - 1))
+
 
 #printf 'expected=%u, count=%u\n' "$expected" "$count"
 
@@ -40,10 +47,20 @@ if [ "$count" = 0 ]; then
     exit 0
 fi
 
+show_report() {
+    mount | grep "$CHROOT" | awk '{printf("%-16s %-28s %s\n", $1, $3, $5)}'
+    printf '\n%s\n\n' '===> Setup scripts found in the chroot:'
+    sudo ls "$CHROOT/root/" | grep -E 'inside-.*\.sh'
+    printf '\n'
+}
+
 # unusual, more mounts than expected
 if [ "$count" -gt "$expected" ]; then
-    printf '@@ TOO-MANY mounts! UNEXPECTED, terminating.\n' > $stderr
+    show_report
+    tmpl='@@ TOO-MANY mounts (%u != %u) - UNEXPECTED! Terminating.\n'
+    printf "$tmpl" "$count" "$expected" > $stderr
     exit 90
+    # exit 0
 fi
 
 # else:
@@ -51,12 +68,15 @@ fi
 if [ "$count" = 1 ]; then
     rc_base=10
     result_msg="*Single* chroot mount"
+
 elif [ "$count" = "$expected" ]; then
     rc_base=20
     result_msg="*Full* chroot mount"
+
 elif [ "$count" -lt "$expected" ]; then
     rc_base=80
     result_msg="*PARTIAL* chroot mount (unexpected!)"
+
 else
     {
         values="count='$count', expected='$expected'"
@@ -69,9 +89,11 @@ fi
 if sudo ls -l /tmp/mash-ramdisk/root/ | grep -Eq 'inside-.*-mate-desktop'; then
     rc_base="$(expr $rc_base + 2)"
     result_msg="${result_msg} of *mate-desktop*."
+
 elif sudo ls -l /tmp/mash-ramdisk/root/ | grep -Eq 'inside-.*-headless'; then
     rc_base="$(expr $rc_base + 1)"
     result_msg="${result_msg} of *headless*."
+
 else
     rc_base="$(expr $rc_base + 9)"
     result_msg="${result_msg} of UNKNOWN."
@@ -79,8 +101,11 @@ else
 fi
 
 printf '\n%s\n\n' "===> $result_msg"
-mount | grep "$CHROOT" | awk '{printf("%-16s %-28s %s\n", $1, $3, $5)}'
-printf '\n%s\n\n' '===> Setup scripts found in the chroot:'
-sudo ls "$CHROOT/root/" | grep -E 'inside-.*\.sh'
-printf '\n'
+show_report
+
+#mount | grep "$CHROOT" | awk '{printf("%-16s %-28s %s\n", $1, $3, $5)}'
+#printf '\n%s\n\n' '===> Setup scripts found in the chroot:'
+#sudo ls "$CHROOT/root/" | grep -E 'inside-.*\.sh'
+#printf '\n'
+
 exit "$rc_base"

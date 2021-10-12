@@ -94,7 +94,7 @@ $(MATE_DESKTOP_TAR).$(TAR_EXT):  $(FOCAL_HEADLESS_TAR).$(TAR_EXT)
 headless-up: $(FOCAL_HEADLESS_TAR).$(TAR_EXT)
 	./4make/ensure-free-mem.sh 3G
 	make prep-chroot-dir
-	sudo mount -t tmpfs -o size=2G mash-ramdisk "${CHROOT}"
+	[ -n "$$GITHUB_ACTIONS" ] || sudo mount -t tmpfs -o size=2G mash-ramdisk "${CHROOT}"
 	sudo tar -xf "$(FOCAL_HEADLESS_TAR).$(TAR_EXT)" -C "$(CHROOT)"
 	./mount-chroot.sh
 	./4make/copy-mash-in-chroot.sh
@@ -110,7 +110,7 @@ mate-desktop-up:  $(MATE_DESKTOP_TAR).$(TAR_EXT)  prep-chroot-dir
 	echo "TAR_FILE=$(TAR_FILE)"
 	./4make/ensure-free-mem.sh 8G
 	make prep-chroot-dir
-	sudo mount -t tmpfs -o size=6G mash-ramdisk "${CHROOT}"
+	[ -n "$$GITHUB_ACTIONS" ] || sudo mount -t tmpfs -o size=6G mash-ramdisk "${CHROOT}"
 	sudo tar -xzf "$(MATE_DESKTOP_TAR).$(TAR_EXT)" -C "$(CHROOT)"
 	./mount-chroot.sh
 	./4make/copy-mash-in-chroot.sh
@@ -171,6 +171,10 @@ test-%:  _ensure_chroot
 	sudo chroot $(CHROOT) sudo -u mash /home/$(MASH_USER)/run-tests.sh "$*"
 
 
+test-tools:
+	./scripts/tests/zz-test-all.sh | ./scripts/tests/tapview
+
+
 clean-build:
 	rm -rf $(BUILD_DIR); mkdir -p $(BUILD_DIR)
 
@@ -194,5 +198,5 @@ status:
 .PHONY:  _ensure_chroot _ensure_no_chroot mount-chroot umount-chroot prep-chroot-dir chroot-down
 .PHONY:  clean-build clean-downloads clean-all clean
 .PHONY:  headless-up headless-down mate-desktop-up mate-desktop-down
-.PHONY:  test
+.PHONY:  test-% test-tools
 .PHONY:  sync-mash sync-downloads status
