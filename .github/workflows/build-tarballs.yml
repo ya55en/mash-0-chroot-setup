@@ -7,10 +7,10 @@ name: build-tarballs
 on:
   # Suppressing builds on push for now; leaving only chron-based builds.
 
-  # push:
-  #  branches:
-  #  # any branches; $default-branch doesn't seem to work
-  #    - *
+  push:
+    branches:
+    # any branches (must quote the asterisk); $default-branch doesn't seem to work
+      - '*'
 
   schedule:
     # every monday & wednesday, 3:15am EEST
@@ -34,8 +34,9 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get install -y debootstrap make curl
       - run: ./scripts/create-dot-env.sh > .env.mk
-      - run: make build/focal-headless.tar.${MASH_CHROOT_TAR_EXT}
-      - run: make build/focal-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
-      - run: echo ${{ secrets.YASSENS_GITHUB_TOKEN }} | gh auth login --with-token
-      - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/focal-headless.tar.${MASH_CHROOT_TAR_EXT}
-      - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/focal-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
+      - run: ./scripts/tests/zz-test-all.sh | ./scripts/tests/tapview
+      # - run: make build/focal-headless.tar.${MASH_CHROOT_TAR_EXT}
+      # - run: make build/focal-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
+      # - run: echo ${{ secrets.YASSENS_GITHUB_TOKEN }} | gh auth login --with-token
+      # - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/focal-headless.tar.${MASH_CHROOT_TAR_EXT}
+      # - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/focal-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
