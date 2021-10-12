@@ -1,4 +1,13 @@
 #! /bin/bash
+#: Build focal-headless.TAR_EXT and focal-mate-desktop.TAR_EXT.
+#: A special phase exists when this script copies corresponding script
+#: from ./chroot-setup/4make/inside-chroot/ and executes it within
+#: the chroot environment -- see `work_inside_chroot()`.
+#: See main() below for a detailed list of actions.
+
+# TODO:
+#   - Document function
+#   - Clean up (e.g. commented and unneeded code)
 
 PAUSE_SEC=4 # secs to wait for Ctr-C before final umount
 
@@ -80,7 +89,7 @@ copy_vnc_psswd() {
         sudo mkdir -p "${CHROOT}${MASH_USER_HOME}/.vnc"
         echo '>>> Copying ./resources/passwd to '"${CHROOT}${MASH_USER_HOME}/.vnc/"
         sudo cp -p ./resources/passwd "${CHROOT}${MASH_USER_HOME}/.vnc/"
-        sudo chown "${MASH_UID}:${MASH_UID}" "${CHROOT}${MASH_USER_HOME}/.vnc/passwd"
+        # sudo chown "${MASH_UID}:${MASH_UID}" "${CHROOT}${MASH_USER_HOME}/.vnc/passwd"  # done in last step
         sudo chmod 600 "${CHROOT}${MASH_USER_HOME}/.vnc/passwd"
     else
         # printf '\n\n\n'
@@ -103,6 +112,23 @@ work_inside_chroot() {
     printf '\n\n===== END %s ===========================================\n\n' "${target_path}"
     sleep 1
     ./umount-chroot.sh "${CHROOT}" keep-root
+}
+
+copy_runtests_script() {
+    # Needs to be called _after_ work_inside_chroot() to find the mash HOME.
+    echo 'Copy ./resources/run-tests.sh into the chroot (expanding vars)...'
+    ./scripts/expand-vars.sh < ./resources/run-tests.sh | sudo tee "${CHROOT}/home/${MASH_USER}/run-tests.sh"
+    sudo chmod u+x,g+x "${CHROOT}/home/${MASH_USER}/run-tests.sh"
+}
+
+fix_ownership_on_mash_home() {
+    echo 'Fixing ownership on mash home...'
+    echo sudo chown -R "${MASH_UID}:${MASH_UID}" "${CHROOT}/home/${MASH_USER}"
+    sudo chown -R "${MASH_UID}:${MASH_UID}" "${CHROOT}/home/${MASH_USER}"
+}
+
+add_superuser_history() {
+    echo 'sudo -iu mash' | sudo tee "${CHROOT}/root/.bash_history"
 }
 
 create_final_tarball() {
@@ -129,6 +155,9 @@ main() {
     fixes_for_headless
     copy_vnc_psswd
     work_inside_chroot
+    copy_runtests_script
+    fix_ownership_on_mash_home
+    add_superuser_history
     create_final_tarball
 
     echo "==> Press Ctrl-C within ${PAUSE_SEC} sec. to stop before unmounting the chroot..."

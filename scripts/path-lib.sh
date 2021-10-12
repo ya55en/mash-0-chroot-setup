@@ -2,7 +2,7 @@
 # path-lib.sh should be sourced.
 
 
-#: Returns a relative part of given path $1 from given directory $2 to
+#: Return a relative part of given path $1 from given directory $2 to
 #: the end of the path, stripping the part from the beginning to the
 #: given directory.
 relpath_from_dir() {
@@ -12,6 +12,7 @@ relpath_from_dir() {
     echo "$path" | sed "s:^.*/\?\($dir/.*$\):\1:"
 }
 
+# TODO: provide proper tests based on lib-4test.
 
 test_relpath_from_dir() {
     res="$(relpath_from_dir '/one/two/three/four/five' 'three')"  # expected three/four/five
@@ -22,4 +23,4 @@ test_relpath_from_dir() {
     echo $res
 }
 
-test_relpath_from_dir
+# test_relpath_from_dir
