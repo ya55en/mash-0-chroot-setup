@@ -5,15 +5,16 @@
 name: build-tarballs
 
 on:
-  push:
-    branches:
-      # any branches; $default-branch doesn't seem to work
-      - main
-      - 46-tarball-ci-action
-      # - '*'
+  # Suppressing builds on push for now; leaving only chron-based builds.
+
+  # push:
+  #  branches:
+  #  # any branches; $default-branch doesn't seem to work
+  #    - *
+
   schedule:
-    # every monday, thursday, friday, 3:15am EEST
-    - cron:  '15 0 * * 1,3,5'
+    # every monday & wednesday, 3:15am EEST
+    - cron:  '15 0 * * 1,4'
 
 jobs:
   build-focal-headless:
@@ -22,7 +23,7 @@ jobs:
     environment: STAGE
 
     env:
-      MASH_CHROOT_TAR_EXT: xz
+      MASH_CHROOT_TAR_EXT: gz
       MASH_CHROOT_USER_PSSWD_HASH: ${{ secrets.MASH_CHROOT_USER_PSSWD_HASH }}
       MASH_CHROOT_RELEASE_TAG: ${{ secrets.MASH_CHROOT_RELEASE_TAG }}
 
