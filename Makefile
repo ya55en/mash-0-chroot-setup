@@ -99,6 +99,7 @@ headless-up: $(FOCAL_HEADLESS_TAR).$(TAR_EXT)
 	./mount-chroot.sh
 	./4make/copy-mash-in-chroot.sh
 	make sync-downloads
+	sudo chown -R "${MASH_UID}:${MASH_UID}" "${CHROOT}/home/${MASH_USER}"
 	@printf 'Now do something in the chroot ;)  e.g.\n\n $$ sudo chroot $(CHROOT) bash\n\n'
 
 
@@ -114,6 +115,7 @@ mate-desktop-up:  $(MATE_DESKTOP_TAR).$(TAR_EXT)  prep-chroot-dir
 	./mount-chroot.sh
 	./4make/copy-mash-in-chroot.sh
 	make sync-downloads
+	sudo chown -R "${MASH_UID}:${MASH_UID}" "${CHROOT}/home/${MASH_USER}"
 	sudo chroot "$(CHROOT)" start-vnc.sh
 	@printf 'Now do something in the chroot ;)  e.g.\n\n $$ sudo chroot $(CHROOT) bash\n\n'
 

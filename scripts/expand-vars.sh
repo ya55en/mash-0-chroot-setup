@@ -1,22 +1,40 @@
 #! /bin/sh
+#: expand-vars.sh - part of ma'shmallow chroot setup sub-project.
+#:
+#: Process a file from standard input, line by line, substituting
+#: shell variables in each line with their values (if any) and
+#: printing the resulting line, thus effectively expanding all known
+#: variables.
+#: Usage:
+#:  $  cat /path/to/input.file | ./scripts/expand-vars.sh > /path/to/output.file
+#:
+#: For example, resources/run-tests.sh needs substitution:
+#:  $ cat resources/run-tests.sh | ./scripts/expand-vars.sh
 
 # shellcheck disable=2034
 
 MASH_USER=mash
 MASH_UID=1234
 
+main_loop() {
+    local varnames="$1"
+    local line
 
-expand_vars() {
-    local file="$1"
-    local varnames="$2"
+    _process_line() {
+        for varname in $varnames; do
+            sed_arg="s:\${\?$varname}\?:$(eval "echo \$$varname"):g"
+            line="$(printf '%s' "$line" | sed "$sed_arg")"
+        done
+    }
 
-    content="$(cat "$1")"
-    for varname in $varnames; do
-        sed_arg="s:\${\?$varname}\?:$(eval "echo \$$varname"):g"
-        printf '\n%s\n\n' "$sed_arg"
-        content="$(printf '%s' "$content" | sed "$sed_arg" )"
+    while read -r line; do
+        _process_line
+        echo $line
     done
-    printf '%s' "$content"
 }
 
-expand_vars ./run-tests.sh "MASH_USER MASH_UID"
+main() {
+    main_loop 'MASH_USER MASH_UID'
+}
+
+main
