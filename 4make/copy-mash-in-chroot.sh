@@ -15,7 +15,7 @@ main() {
     echo "Installing mash + tests in chrooted env..."
     cwd="$(pwd)"
     cd ..  # go to the main project root
-    _mash_version_="$(./scripts/4make/dump-version.sh)"
+    _mash_version_="$(./scripts/dump-version.sh)"
     make dist
     sudo mkdir -p "${CHROOT}${_DOWNLOAD_CACHE}/"
     ls -la ./dist/*
