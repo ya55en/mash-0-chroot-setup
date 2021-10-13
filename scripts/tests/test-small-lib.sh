@@ -1,17 +1,15 @@
 #! /bin/sh
 # Tests for small-lib.sh. Can be executed directly or sourced.
 
-# shellcheck disable=1091
-{
-    # Paths are relative to the chroot-setup project root
-    . ./scripts/small-lib.sh
-    . ./scripts/tests/lib-4test.sh
-}
+. "$MASH_HOME/lib/sys.sh"
 
-# must follow the imports otherwise _tsl_name_ gets overriden
+
 _name_="$(basename "$0")"
 _tsl_name_='test-small-lib.sh'
-echo "$_tsl_name_: _name_=[$_name_], _tsl_name_=[$_tsl_name_]"
+#echo "$_tsl_name_: _name_=[$_name_], _tsl_name_=[$_tsl_name_]"
+
+import lib-4test
+import small-lib
 
 test_has_substr__true() {
     _curr_test_=test_has_substr__true

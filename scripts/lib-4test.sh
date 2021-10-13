@@ -7,10 +7,13 @@
 
 # TODO: currently print_pass executes always,
 #   even if one or more of the sub-tests fail.
+# TODO: provide a wrapper for test execution.
+
+
 
 _name_="$(basename "$0")"
 _l4t_name_='lib-4test.sh'
-echo "$_l4t_name_: _name_=[$_name_], _l4t_name_=[$_l4t_name_]"
+#echo "$_l4t_name_: _name_=[$_name_], _l4t_name_=[$_l4t_name_]"
 
 _curr_test_=''
 

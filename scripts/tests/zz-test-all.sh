@@ -12,8 +12,8 @@ print_header() {
 }
 
 test() {
-    print_header ./scripts/tests/lib-4test.sh
-    ./scripts/tests/lib-4test.sh test
+    print_header ./scripts/lib-4test.sh
+    ./scripts/lib-4test.sh test
 
     print_header ./scripts/tests/test-small-lib.sh
     ./scripts/tests/test-small-lib.sh

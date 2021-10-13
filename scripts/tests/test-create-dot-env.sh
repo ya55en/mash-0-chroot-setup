@@ -1,17 +1,14 @@
 #! /bin/sh
 # Tests for create-dot-env.sh. Can be executed directly or sourced.
 
-# shellcheck disable=1091
-{
-    # Paths are relative to the chroot-setup project root
-    . ./scripts/create-dot-env.sh
-    . ./scripts/tests/lib-4test.sh
-}
+. "$MASH_HOME/lib/sys.sh"
 
-# must follow the imports otherwise _tcde_name_ gets overriden
 _name_="$(basename "$0")"
 _tcde_name_='test-create-dot-env.sh'
-echo "$_tcde_name_: _name_=[$_name_], _tcde_name_=[$_tcde_name_]"
+#echo "$_tcde_name_: _name_=[$_name_], _tcde_name_=[$_tcde_name_]"
+
+import lib-4test
+import create-dot-env.sh
 
 # shellcheck disable=2003,2016
 test_split_line() {

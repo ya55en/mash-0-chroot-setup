@@ -2,19 +2,21 @@
 #: Parse `.env.mk.sample` and spit an output to stdout which is suitable
 #: to become the `.env` of the chroot-setup.
 
-# shellcheck disable=1091
-# . "$(dirname "$0")/small-lib.sh"
+# Fails during CI build:
+#. "$MASH_HOME/lib/sys.sh"
+#import small-lib
+
 . ./scripts/small-lib.sh
 
 _name_="$(basename "$0")"
 _cde_name_='create-dot-env.sh'
-echo "$_cde_name_: _name_=[$_name_], _cde_name_=[$_cde_name_]"
+#echo "$_cde_name_: _name_=[$_name_], _cde_name_=[$_cde_name_]"
 
-ENV_SAMPLE_FILE='.env.mk.sample'
+_CDE__ENV_SAMPLE_FILE='.env.mk.sample'
 
 #: If this is an assignment, split the line into lhs (the lhs) and rhs
 #: and echo back the lhs, the assign operator and the rhs, space-delimited;
-#: othereise fail.
+#: otherwise fail.
 split_line() {
     local line="$1"
 
@@ -73,7 +75,7 @@ main() {
         fi
         echo "${lhs} ${assign} ${rhs}"
 
-    done < "$ENV_SAMPLE_FILE"
+    done < "$_CDE__ENV_SAMPLE_FILE"
     IFS="$OIFS"
 }
 
