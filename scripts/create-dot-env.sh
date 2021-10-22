@@ -3,7 +3,7 @@
 #: to become the `.env` of the chroot-setup.
 
 # Fails during CI build:
-#. "$MASH_HOME/lib/sys.sh"
+. "$MASH_HOME/lib/sys.sh"
 #import small-lib
 
 . ./scripts/small-lib.sh

@@ -9,6 +9,9 @@
 #   even if one or more of the sub-tests fail.
 # TODO: provide a wrapper for test execution.
 
+. "$MASH_HOME/lib/sys.sh"
+
+die 42 "OBSOLETE -- do NOT import, do NOT use! (use unittest/assert instead)"
 
 
 _name_="$(basename "$0")"

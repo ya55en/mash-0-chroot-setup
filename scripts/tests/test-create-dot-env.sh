@@ -7,7 +7,7 @@ _name_="$(basename "$0")"
 _tcde_name_='test-create-dot-env.sh'
 #echo "$_tcde_name_: _name_=[$_name_], _tcde_name_=[$_tcde_name_]"
 
-import lib-4test
+import unittest/assert
 import create-dot-env.sh
 
 # shellcheck disable=2003,2016

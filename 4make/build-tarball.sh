@@ -1,4 +1,6 @@
 #! /bin/bash
+#: Executable: hwo, when, why
+
 #: Build focal-headless.TAR_EXT and focal-mate-desktop.TAR_EXT.
 #: A special phase exists when this script copies corresponding script
 #: from ./chroot-setup/4make/inside-chroot/ and executes it within
@@ -8,6 +10,10 @@
 # TODO:
 #   - Document function
 #   - Clean up (e.g. commented and unneeded code)
+
+. "$MASH_HOME/lib/sys.sh"
+
+
 
 PAUSE_SEC=4 # secs to wait for Ctr-C before final umount
 

@@ -8,7 +8,7 @@ _name_="$(basename "$0")"
 _tsl_name_='test-small-lib.sh'
 #echo "$_tsl_name_: _name_=[$_name_], _tsl_name_=[$_tsl_name_]"
 
-import lib-4test
+import unittest/assert
 import small-lib
 
 test_has_substr__true() {
