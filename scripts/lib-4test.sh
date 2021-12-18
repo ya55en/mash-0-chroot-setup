@@ -9,7 +9,9 @@
 #   even if one or more of the sub-tests fail.
 # TODO: provide a wrapper for test execution.
 
+. "$POSIXSH_STDLIB_HOME/sys.sh"
 
+die 42 "OBSOLETE -- do NOT import, do NOT use! (use unittest/assert instead)"
 
 _name_="$(basename "$0")"
 _l4t_name_='lib-4test.sh'

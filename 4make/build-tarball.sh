@@ -9,6 +9,8 @@
 #   - Document function
 #   - Clean up (e.g. commented and unneeded code)
 
+. "$POSIXSH_STDLIB_HOME/sys.sh"
+
 PAUSE_SEC=4 # secs to wait for Ctr-C before final umount
 
 TARGET_NAME="$1"

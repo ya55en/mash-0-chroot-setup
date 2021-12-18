@@ -1,7 +1,8 @@
 #! /bin/sh
 # Tests for small-lib.sh. Can be executed directly or sourced.
 
-. "$MASH_HOME/lib/sys.sh"
+#. "$MASH_HOME/lib/sys.sh"
+. "$POSIXSH_STDLIB_HOME/sys.sh"
 
 
 _name_="$(basename "$0")"

@@ -1,7 +1,8 @@
 #! /bin/sh
 # Tests for create-dot-env.sh. Can be executed directly or sourced.
 
-. "$MASH_HOME/lib/sys.sh"
+#. "$MASH_HOME/lib/sys.sh"
+. "$POSIXSH_STDLIB_HOME/sys.sh"
 
 _name_="$(basename "$0")"
 _tcde_name_='test-create-dot-env.sh'
