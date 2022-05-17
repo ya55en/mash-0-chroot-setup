@@ -1,12 +1,13 @@
 #! /bin/sh
 # Tests for small-lib.sh. Can be executed directly or sourced.
 
-. "$MASH_HOME/lib/sys.sh"
-
+. "$POSIXSH_STDLIB_HOME/sys.sh"
 
 _name_="$(basename "$0")"
 _tsl_name_='test-small-lib.sh'
 #echo "$_tsl_name_: _name_=[$_name_], _tsl_name_=[$_tsl_name_]"
+
+POSIXSH_IMPORT_PATH="$POSIXSH_IMPORT_PATH:./scripts"
 
 import lib-4test
 import small-lib

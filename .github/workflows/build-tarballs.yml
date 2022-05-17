@@ -25,6 +25,7 @@ jobs:
     environment: STAGE
 
     env:
+      UBUNTU_CODENAME: focal
       MASH_CHROOT_TAR_EXT: gz
       MASH_CHROOT_USER_PSSWD_HASH: ${{ secrets.MASH_CHROOT_USER_PSSWD_HASH }}
       MASH_CHROOT_RELEASE_TAG: ${{ secrets.MASH_CHROOT_RELEASE_TAG }}
@@ -37,8 +38,8 @@ jobs:
       - run: sudo apt-get install -y debootstrap make curl
       - run: ./scripts/create-dot-env.sh > .env.mk
       - run: ./scripts/tests/zz-test-all.sh | ./scripts/tests/tapview
-      - run: make build/focal-headless.tar.${MASH_CHROOT_TAR_EXT}
-      - run: make build/focal-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
+      - run: make build/${UBUNTU_CODENAME}-headless.tar.${MASH_CHROOT_TAR_EXT}
+      - run: make build/${UBUNTU_CODENAME}-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
       - run: echo ${{ secrets.YASSENS_GITHUB_TOKEN }} | gh auth login --with-token
-      - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/focal-headless.tar.${MASH_CHROOT_TAR_EXT}
-      - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/focal-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}
+      - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/${UBUNTU_CODENAME}-headless.tar.${MASH_CHROOT_TAR_EXT}
+      - run: gh release upload --clobber ${MASH_CHROOT_RELEASE_TAG} ./build/${UBUNTU_CODENAME}-mate-desktop.tar.${MASH_CHROOT_TAR_EXT}

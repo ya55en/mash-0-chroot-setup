@@ -1,11 +1,13 @@
 #! /bin/sh
 # Tests for create-dot-env.sh. Can be executed directly or sourced.
 
-. "$MASH_HOME/lib/sys.sh"
+. "$POSIXSH_STDLIB_HOME/sys.sh"
 
 _name_="$(basename "$0")"
 _tcde_name_='test-create-dot-env.sh'
 #echo "$_tcde_name_: _name_=[$_name_], _tcde_name_=[$_tcde_name_]"
+
+POSIXSH_IMPORT_PATH="$POSIXSH_IMPORT_PATH:./scripts"
 
 import lib-4test
 import create-dot-env.sh
