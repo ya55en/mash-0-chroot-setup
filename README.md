@@ -33,8 +33,8 @@ $ ./scripts/create-dot-env.sh > .env.mk
 (Otherwise `make` would yell something like:
 
 ```
-Makefile:8: .env: No such file or directory
-make: *** No rule to make target '.env'.  Stop.
+Makefile:12: .env.mk: No such file or directory
+make: *** No rule to make target '.env.mk'.  Stop.
 ```
 )
 
@@ -87,9 +87,9 @@ AND meanwhile, create the corresponding tarball if it is not yet created:
 
 ## Known issues
 
-No known issues.
+No known issues ATM.
 
-(We have moved to a non-incremental `tar` archives, so the issue with the
+(We have moved to non-incremental `tar` archives, so the issue with the
 error message during un-archiving is no longer there.)
 
 
@@ -97,16 +97,19 @@ error message during un-archiving is no longer there.)
 
 Lots of things, to be populated later. Most importantly:
 
-- Convert the `chroot-setup` directpry into a submodule within it's own
-  git repository hosted on github.
-
 - Experiment with xz compression.
+
+- Have test execution targets directly into the `Makefile` and use these
+  to run e2e and other tests;
+
+
+## DONE
 
 - Create releases for the `chroot-setup` project with the two archived
   chroot environments.
 
-- Have test execution targets directly into the `Makefile` and use these
-  to run e2e and other tests;
+- Convert the `chroot-setup` directory into a submodule within it's own
+  git repository hosted on github.
 
 
 [1]: <https://wiki.debian.org/Debootstrap> "Debootstrap"

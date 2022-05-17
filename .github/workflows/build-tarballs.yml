@@ -15,8 +15,8 @@ on:
       - main
 
   schedule:
-    # every monday + wednesday, 3:15am EEST
-    - cron:  '15 0 * * 1,4'
+    # every Thursday, 3:15am EEST (0:15 UTC)
+    - cron:  '15 0 * * 4'
 
 jobs:
   build-focal-headless:
